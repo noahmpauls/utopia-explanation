@@ -1,0 +1,74 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.6;
+}
+
+p,
+h1, h2, h3, h4, h5, h6,
+li,
+dl, dt,
+blockquote {
+  overflow-wrap: break-word;
+}
+
+
+body {
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+body > * {
+  margin-inline: auto;
+  max-width: 40rem;
+  padding-inline: 0.5rem;
+}
+
+.stack > * + * {
+  margin-block-start: var(--stack, 1.6rem);
+}
+
+ol,
+ul {
+  margin-inline-start: 1rem;
+}
+
+details, pre {
+  padding: 1rem;
+  background: hsl(0deg, 0%, 93%);
+}
+
+figure {
+  display: block;
+  padding: 1rem;
+  border: 1px solid black;
+}
+
+div[contenteditable] {
+  min-block-size: 7rem;
+  block-size: 10rem;
+  overflow: auto;
+  resize: block;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+label {
+  display: block;
+}
+
+input {
+  display: block;
+}

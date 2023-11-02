@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluid Size Tool</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body class="stack">
+  <header>
+    <h1>Fluid Size Tool</h1>
+  </header>
+  <main class="stack">
+    <p>
+      I want to explore how <a href="https://utopia.fyi" target="_blank">Utopia</a> goes about calculating values for responsive sizes, both of text and of spacing.
+    </p>
+
+    <details class="stack">
+      <summary>
+        Wait, what are we talking about here?
+      </summary>
+      <p>
+        Websites are displayed on screens of all different sizes. It can be difficult to make your website's content appear readable and usable in such a wide variety of environments.
+      </p>
+      <p>
+        A wise approach to solving this problem is to make your site <strong>responsive</strong>; that is, your site adjusts its look and feel depending on the dimensions of the screen on which it is displayed ("responding" to the environment).
+      </p>
+      <p>
+        Responsive design involves a wide array of techniques. Covered here is the ability to properly size elements and text based on the width of the screen. You may want your default text size to be slightly smaller for a mobile phone than a desktop screen, for instance.
+      </p>
+    </details>
+    
+    <h2>Linear Font Scaling</h2>
+    <p>
+      Let's use font size as the motivating example. I want a value for font size that responds to the width of the screen, so that font appears slightly smaller at lower widths and slightly larger at higher widths.
+    </p>
+    <p>
+      Our first attempt will be to set the font size to a straight percentage of the view width. We can also add an offset to set a base font size that the width percentage is added on top of.
+    </p>
+    <pre><code>:root {
+  --percent: 0.65;
+  --offset: 10px;
+}
+
+body {
+  font-size: calc((var(--percent) / 100)vw + var(--offset));
+}</code></pre>
+    <p>
+      We're essentially creating a linear function that governs the font size:
+    </p>
+    <pre><code>y = mx + b
+
+y = font-size
+m = --percent
+x = view width
+b = --offset</code></pre>
+    <p>
+      What does that look like? Use the demo below to adjust the screen size and see for yourself. Try setting the parameters so that the font appears at a reasonable size across the whole range.
+    </p>
+    <figure>
+      <div id="demo1-display" contenteditable>
+        Cascading Style Sheets (CSS) is a style sheet language used for describing the presentation of a document written in a markup language such as HTML or XML (including XML dialects such as SVG, MathML or XHTML). CSS is a cornerstone technology of the World Wide Web, alongside HTML and JavaScript.
+      </div>
+      <div>
+        <input type="number" id="demo1-percent" min="0" max="100">
+        <label for="demo1-percent">% of view width</label>
+      </div>
+      <div>
+        <input type="number" id="demo1-offset">
+        <label for="demo1-offset">font size pixel offset</label>
+      </div>
+      <input type="range" id="demo1-slider" min="100" max="3840">
+      <div id="demo1-screen-size"></div>
+      <div id="demo1-font-size"></div>
+    </figure>
+    <p>
+      As you can probably tell, tuning the parameters to be just right is quite a chore. And it's nearly impossible to find the settings that work <em>just right</em> across the whole spectrum of different widths. Usually, one or both of the extreme ends looks too small or too big.
+    </p>
+    <p>
+      (To be clear, it is <em>possible</em> to find decent-looking values that work across a very wide range; try <code>0.2%</code> with a <code>14.3px</code> offset.)
+    </p>
+    
+    <h2>Setting Font Size Boundaries</h2>
+    <p>
+      Ultimately, a purely linear scale for the font isn't usually the desired solution. As the screen size reaches the extreme ends of the scale, there's a point where the font is "big enough" or "small enough", and going any larger or smaller would be obnoxious or unreadable.
+    </p>
+    <p>
+     What if we decide a minimum and maximum size for the text, then restrict the font size to those limits at the extremes?
+    </p>
+    <p>
+      CSS provides us an easy way to accomplish just that, using the <code>clamp</code> function. Let's add a few more parameters to our previous example:
+    </p>
+    <pre><code>:root {
+  --percent: 0.45;
+  --offset: 10px;
+  --minFont: 16px;
+  --maxFont: 20px;
+}
+
+body {
+  --linear-scale: calc((var(--percent) / 100)vw + var(--offset));
+  font-size: clamp(var(--minFont), var(--linear-scale), var(--maxFont));
+}</code></pre>
+    <p>
+      Does that improve our situation? Try out the demo below and see for yourself:
+    </p>
+    <figure>
+      <div id="demo2-display" contenteditable>
+        Cascading Style Sheets (CSS) is a style sheet language used for describing the presentation of a document written in a markup language such as HTML or XML (including XML dialects such as SVG, MathML or XHTML). CSS is a cornerstone technology of the World Wide Web, alongside HTML and JavaScript.
+      </div>
+      <div class="controls">
+        <div>
+          <input type="number" id="demo2-percent" min="0" max="100">
+          <label for="demo2-percent">% of view width</label>
+        </div>
+        <div>
+          <input type="number" id="demo2-offset">
+          <label for="demo2-offset">font size pixel offset</label>
+        </div>
+        <div>
+          <input type="number" id="demo2-min-font">
+          <label for="demo2-min-font">minimum font size</label>
+        </div>
+        <div>
+          <input type="number" id="demo2-max-font">
+          <label for="demo2-max-font">maximum font size</label>
+        </div>
+        <div>
+
+          <input type="range" id="demo2-slider" min="100" max="3840">
+          <label for="demo2-slider" id="demo2-screen-size"></label>
+        </div>
+        <div id="demo2-font-size"></div>
+      </div>
+    </figure>
+    <p>
+      Now that's more like it! The minimum and maximum sizes are completely predictable. It's pretty easy to tune the slope between those two values to move smoothly across a desired range of screen sizes.
+    </p>
+    
+    <h2>Perfecting the method</h2>
+    <p>
+      If you messed with the previous demo and tried to dial in an ideal range, you might have tried to cause the font size to reach its minimum and maximum points at specific screen sizes. It can be done, but trying to guess the right view width percentage and pixel offset is difficult.
+    </p>
+    <p>
+      Let's do something way easier: pick the target screen sizes where we want to reach the minimum and maximum font sizes, then use those to calculate the view width percentage and offset.
+    </p>
+    <p>
+      Let's go back to the equation for a line. In our case, we are trying to find a font size (<code>y</code>) based on a percentage (<code>m</code>) of the screen width (<code>x</code>). If we pick screen size boundaries for our min and max font sizes, we effectively know two points on that line:
+    </p>
+    <pre><code>p = (x, y)
+
+p1 = (minScreen, minFont)
+p2 = (maxScreen, maxFont)</code></pre>
+    <p>
+      We can calculate the slope of our line using these two points using some algebra:
+    </p>
+    <pre><code>m = (p2.y - p1.y) / (p2.x - p1.x)</code></pre>
+    <p>
+      Once we have the slope, we can use one of the points to calculate the intercept:
+    </p>
+    <pre>b = p1.y - (p1.x * m)</pre>
+    <p>
+      And that gives us everything we need to calculate our view width percentage (<code>m</code>) and offset (<code>b</code>) using easily understood parameters!
+    </p>
+    <p>
+      Try it out below:
+    </p>
+    <figure>
+      <div id="demo3-display" contenteditable>
+        Cascading Style Sheets (CSS) is a style sheet language used for describing the presentation of a document written in a markup language such as HTML or XML (including XML dialects such as SVG, MathML or XHTML). CSS is a cornerstone technology of the World Wide Web, alongside HTML and JavaScript.
+      </div>
+      <div>
+        <input type="number" id="demo3-min-font">
+        <label for="demo3-max-font">minimum font size</label>
+      </div>
+      <div>
+        <input type="number" id="demo3-max-font">
+        <label for="demo3-max-font">maximum font size</label>
+      </div>
+      <div>
+        <input type="number" id="demo3-min-screen">
+        <label for="demo3-min-screen">minimum screen size</label>
+      </div>
+      <div>
+        <input type="number" id="demo3-max-screen">
+        <label for="demo3-max-screen">maximum screen size</label>
+      </div>
+      <div id="demo3-percent"></div>
+      <div id="demo3-offset"></div>
+      <input type="range" id="demo3-slider" min="100" max="3840">
+      <div id="demo3-screen-size"></div>
+      <div id="demo3-font-size"></div>
+    </figure>
+    <p>
+      And that's how Utopia works!
+    </p>
+  </main>
+  <footer>
+
+  </footer>
+</body>
+</html>
